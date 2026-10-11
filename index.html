@@ -1,160 +1,298 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Deploy Demo v1</title>
 
-<!-- ===================================================================
-     The line just below this comment is the HEALTH MARKER.
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-     The deploy pipeline greps the live page for that exact word. If the
-     marker is missing or misspelled, the deploy FAILS and the pipeline
-     rolls the website back to the previous version.
-
-     IMPORTANT: this must be the ONgLY place in the file where those
-     7 characters appear literally. Everywhere else on the page the
-     name is written with an HTML entity (SITE&#45;OK) so that it
-     LOOKS the same in the browser but does NOT match the grep.
-     =================================================================== -->
+<title>Naveen Tech School | Cloud & DevOps</title>
 <!-- SITE-OK -->
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
+
 <style>
-  :root {
-    --bg:   #f6f7f9;
-    --card: #ffffff;
-    --text: #1a1d21;
-    --muted:#5c6570;
-    --line: #e3e6ea;
-    --good: #1a7f4b;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg:   #14171a;
-      --card: #1d2126;
-      --text: #e8eaed;
-      --muted:#9aa4b0;
-      --line: #2e343b;
-      --good: #4ade80;
-    }
-  }
 
-  * { box-sizing: border-box; }
+:root{
 
-  body {
-    margin: 0;
-    padding: 40px 20px;
-    background: var(--bg);
-    color: var(--text);
-    font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
-  }
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
 
-  main { max-width: 640px; margin: 0 auto; }
+  --bg:#080a24;--bg2:#10123a;--card:rgba(255,255,255,.05);--line:rgba(255,255,255,.12);
 
-  .card {
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 28px;
-    margin-bottom: 20px;
-  }
+  --text:#eef0ff;--mute:#a6abd6;--cyan:#22e4ff;--violet:#9b6bff;--pink:#ff5fd2;--lime:#7dffb2;
 
-  h1 { margin: 0 0 4px; font-size: 26px; }
-  h2 { margin: 0 0 12px; font-size: 17px; }
+  --glow:rgba(34,228,255,.35);
 
-  .version {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 20px;
-    background: var(--good);
-    color: #fff;
-    font-size: 14px;
-    font-weight: 600;
-  }
-  @media (prefers-color-scheme: dark) {
-    .version { color: #14171a; }
-  }
+  --fd:'Unbounded','Trebuchet MS',sans-serif;--fb:'Manrope','Segoe UI',system-ui,sans-serif;
 
-  .status { color: var(--good); font-weight: 600; }
-  .muted  { color: var(--muted); }
+}
 
-  code {
-    background: var(--bg);
-    border: 1px solid var(--line);
-    border-radius: 4px;
-    padding: 2px 6px;
-    font-family: ui-monospace, Consolas, monospace;
-    font-size: 14px;
-  }
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){
 
-  pre {
-    background: var(--bg);
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 14px;
-    overflow-x: auto;
-  }
-  pre code { background: none; border: none; padding: 0; }
+  --bg:#f3f4ff;--bg2:#e4e6ff;--card:rgba(255,255,255,.8);--line:rgba(30,30,90,.15);
 
-  ol { padding-left: 22px; }
-  li { margin-bottom: 10px; }
+  --text:#14163f;--mute:#4b4f85;--cyan:#0079b8;--violet:#6a3df0;--pink:#c2188f;--lime:#0f8a52;--glow:rgba(106,61,240,.25)}}
+
+:root[data-theme="light"]{--bg:#f3f4ff;--bg2:#e4e6ff;--card:rgba(255,255,255,.8);--line:rgba(30,30,90,.15);--text:#14163f;--mute:#4b4f85;--cyan:#0079b8;--violet:#6a3df0;--pink:#c2188f;--lime:#0f8a52;--glow:rgba(106,61,240,.25)}
+
+:root[data-theme="dark"]{--bg:#080a24;--bg2:#10123a}
+
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+
+*,*::before,*::after{box-sizing:inherit}
+
+body{margin:0;background:var(--bg);color:var(--text);font:400 1rem/1.65 var(--fb);overflow-x:hidden;
+
+  background-image:radial-gradient(900px 500px at 85% -10%,rgba(155,107,255,.28),transparent 60%),radial-gradient(700px 500px at 0% 20%,rgba(34,228,255,.16),transparent 60%)}
+
+a{color:inherit}
+
+:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;border-radius:6px}
+
+.wrap{max-width:1100px;margin:0 auto;padding:0 22px}
+
+nav{display:flex;justify-content:space-between;align-items:center;padding:22px 0}
+
+.logo{font:700 1.05rem var(--fd);letter-spacing:.02em;text-decoration:none}
+
+.logo i{font-style:normal;background:linear-gradient(90deg,var(--cyan),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+
+nav a.pill{font-size:.9rem;text-decoration:none;border:1px solid var(--line);padding:8px 16px;border-radius:99px;background:var(--card)}
+
+h1{font:700 clamp(2rem,6vw,4rem)/1.08 var(--fd);margin:56px 0 18px;max-width:15ch;letter-spacing:-.02em}
+
+.grad{background:linear-gradient(95deg,var(--cyan),var(--violet) 55%,var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.lead{color:var(--mute);max-width:56ch;font-size:1.1rem;margin:0 0 28px}
+
+.btns{display:flex;gap:12px;flex-wrap:wrap}
+
+.btn{display:inline-block;padding:13px 24px;border-radius:12px;font-weight:700;text-decoration:none;border:1px solid var(--line)}
+
+.btn.main{background:linear-gradient(95deg,var(--cyan),var(--violet));color:#070826;border:0;box-shadow:0 0 28px var(--glow)}
+
+/* pipeline */
+
+.pipe{margin:56px 0 24px;padding:26px 22px;border:1px solid var(--line);border-radius:20px;background:linear-gradient(180deg,var(--card),transparent);position:relative}
+
+.pipe h2{font:500 .95rem var(--fd);margin:0 0 20px;color:var(--mute)}
+
+.stages{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;position:relative}
+
+.stages::before{content:"";position:absolute;left:6%;right:6%;top:23px;height:2px;background:var(--line)}
+
+.stages::after{content:"";position:absolute;left:6%;top:23px;height:2px;width:0;background:linear-gradient(90deg,var(--cyan),var(--pink));box-shadow:0 0 12px var(--cyan);animation:run 5s ease-in-out infinite}
+
+@keyframes run{0%{width:0}80%,100%{width:88%}}
+
+.st{text-align:center;position:relative;z-index:1}
+
+.dot{width:46px;height:46px;border-radius:50%;margin:0 auto 10px;display:grid;place-items:center;background:var(--bg2);border:2px solid var(--line);font:700 .78rem var(--fd);animation:lit 5s ease-in-out infinite}
+
+.st:nth-child(1) .dot{animation-delay:0s}.st:nth-child(2) .dot{animation-delay:.9s}.st:nth-child(3) .dot{animation-delay:1.8s}.st:nth-child(4) .dot{animation-delay:2.7s}.st:nth-child(5) .dot{animation-delay:3.6s}
+
+@keyframes lit{0%,12%{border-color:var(--line);box-shadow:none}18%,100%{border-color:var(--lime);box-shadow:0 0 18px var(--lime)}}
+
+.st b{display:block;font-size:.88rem}.st small{color:var(--mute);font-size:.78rem}
+
+/* courses */
+
+section{padding:64px 0 8px}
+
+h2.t{font:700 clamp(1.5rem,3.5vw,2.2rem)/1.15 var(--fd);margin:0 0 10px;letter-spacing:-.01em}
+
+.sub{color:var(--mute);margin:0 0 26px;max-width:60ch}
+
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+
+.tab{font:500 .9rem var(--fb);color:var(--text);background:var(--card);border:1px solid var(--line);padding:8px 16px;border-radius:99px;cursor:pointer}
+
+.tab[aria-pressed="true"]{background:linear-gradient(95deg,var(--cyan),var(--violet));color:#070826;border-color:transparent;font-weight:700}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:16px}
+
+.c{padding:22px;border-radius:18px;background:var(--card);border:1px solid var(--line);border-top:3px solid var(--a);display:flex;flex-direction:column;gap:10px}
+
+.c[hidden]{display:none}
+
+.ic{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;font:700 .85rem var(--fd);color:#070826;background:var(--a);box-shadow:0 0 22px color-mix(in srgb,var(--a) 50%,transparent)}
+
+.c h3{margin:0;font:500 1.05rem var(--fd)}
+
+.c p{margin:0;color:var(--mute);font-size:.94rem}
+
+.c ul{margin:0;padding-left:18px;color:var(--text);font-size:.9rem}
+
+.tag{margin-top:auto;font-size:.82rem;color:var(--a);font-weight:700}
+
+/* path */
+
+ol.path{list-style:none;margin:0;padding:0;display:grid;gap:12px;counter-reset:s}
+
+ol.path li{counter-increment:s;display:flex;gap:16px;align-items:flex-start;padding:18px 20px;border:1px solid var(--line);border-radius:16px;background:var(--card)}
+
+ol.path li::before{content:counter(s);flex:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font:700 .9rem var(--fd);background:linear-gradient(135deg,var(--violet),var(--pink));color:#fff}
+
+ol.path b{display:block}ol.path span{color:var(--mute);font-size:.94rem}
+
+.cta{margin:72px 0 40px;padding:44px 28px;text-align:center;border-radius:24px;border:1px solid var(--line);background:linear-gradient(135deg,rgba(34,228,255,.14),rgba(155,107,255,.18),rgba(255,95,210,.14))}
+
+.cta h2{font:700 clamp(1.5rem,4vw,2.4rem)/1.15 var(--fd);margin:0 0 12px}
+
+.cta p{color:var(--mute);margin:0 auto 24px;max-width:48ch}
+
+footer{text-align:center;color:var(--mute);font-size:.85rem;padding:0 0 36px}
+
+@media (max-width:640px){.stages{grid-template-columns:1fr;gap:18px}.stages::before,.stages::after{display:none}.st{display:flex;gap:14px;align-items:center;text-align:left}.dot{margin:0;flex:none}h1{margin-top:36px}}
+
+@media (prefers-reduced-motion:reduce){.stages::after,.dot{animation:none}.stages::after{width:88%}.dot{border-color:var(--lime)}html{scroll-behavior:auto}}
+
 </style>
+
 </head>
+
 <body>
-<main>
 
-  <div class="card">
-    <span class="version">VERSION 3 by 6F</span>
-    <h1 style="margin-top:14px">Deploy Demo by 6FSchool</h1>
-    <p class="muted" style="margin:0">
-      A tiny page for practising an S3 &plus; CloudFront deploy pipeline.
-    </p>
-    <p style="margin:18px 0 0">
-      Health check: <span class="status">&check; passing</span>
-    </p>
-  </div>
+<div class="wrap">
 
-  <div class="card">
-    <h2>How the pipeline checks this page</h2>
-    <p>After uploading, the workflow downloads the live page and looks for
-       one specific word inside it:</p>
-<pre><code>curl -sf https://YOUR-SITE/ -o page.html
-grep -q "SITE&#45;OK" page.html</code></pre>
-    <p class="muted">Marker found &rarr; deploy succeeds.<br>
-       Marker missing &rarr; deploy fails and the old version is restored.</p>
-  </div>
+<nav><a class="logo" href="#">Naveen <i>Tech School</i></a><a class="pill" href="#courses">Courses</a></nav>
 
-  <div class="card">
-    <h2>Try it yourself</h2>
-    <ol>
-      <li>Change <code>VERSION 1</code> above to <code>VERSION 2</code>,
-          commit and push. Watch the pipeline go green, then reload the
-          live site &mdash; you should see version 2.</li>
-      <li>Now break it on purpose. Find the
-          <code>&lt;!&minus;&minus; SITE&#45;OK &minus;&minus;&gt;</code>
-          comment near the top of this file and delete it. Push again.</li>
-      <li>Watch the deploy fail, then watch it put version 2 back by itself.
-          The live site never shows the broken page.</li>
-      <li>Put the marker back to return to normal.</li>
-    </ol>
-  </div>
 
-  <div class="card">
-    <h2>Why the marker is written oddly on this page</h2>
-    <p>The check is a plain text search, so it matches the marker
-       <em>anywhere</em> in the file &mdash; including inside ordinary
-       sentences. If the name were spelled out normally in the text above,
-       deleting the real marker would still leave matches behind, and the
-       health check could never fail.</p>
-    <p>So every mention on this page except the real marker is written as
-       <code>SITE&amp;#45;OK</code>. The browser shows a normal hyphen;
-       <code>grep</code> sees something different. That keeps exactly
-       <strong>one</strong> match in the file.</p>
-    <p class="muted">Check it for yourself:
-       <code>grep -c "SITE&#45;OK" sample.html</code> should print
-       <code>1</code>.</p>
-  </div>
 
-</main>
+<header>
+
+<h1>Learn Cloud and DevOps by <span class="grad">shipping real pipelines</span></h1>
+
+<p class="lead">Hands-on training in AWS, Azure, Docker, Kubernetes, Terraform and CI/CD. Every lesson ends with something running in the cloud.</p>
+
+<div class="btns"><a class="btn main" href="#path">See the learning path</a><a class="btn" href="#courses">Browse courses</a></div>
+
+
+
+<div class="pipe" aria-label="Example CI/CD pipeline you will build">
+
+<h2>The pipeline you will build</h2>
+
+<div class="stages">
+
+<div class="st"><div class="dot">GIT</div><div><b>Push code</b><small>GitHub</small></div></div>
+
+<div class="st"><div class="dot">CI</div><div><b>Build and test</b><small>Actions / Jenkins</small></div></div>
+
+<div class="st"><div class="dot">DK</div><div><b>Package</b><small>Docker image</small></div></div>
+
+<div class="st"><div class="dot">TF</div><div><b>Provision</b><small>Terraform on AWS / Azure</small></div></div>
+
+<div class="st"><div class="dot">K8s</div><div><b>Deploy</b><small>Argo CD to Kubernetes</small></div></div>
+
+</div></div>
+
+</header>
+
+
+
+<section id="courses">
+
+<h2 class="t">Eight tools. One working skill set.</h2>
+
+<p class="sub">Pick a track or take them all. Filter by what you want to learn first.</p>
+
+<div class="tabs" role="group" aria-label="Filter courses">
+
+<button class="tab" data-f="all" aria-pressed="true">All</button>
+
+<button class="tab" data-f="cloud" aria-pressed="false">Cloud</button>
+
+<button class="tab" data-f="containers" aria-pressed="false">Containers</button>
+
+<button class="tab" data-f="cicd" aria-pressed="false">CI/CD</button>
+
+<button class="tab" data-f="iac" aria-pressed="false">Infrastructure as code</button>
+
+</div>
+
+<div class="grid">
+
+<article class="c" data-g="cloud" style="--a:#ffb020"><div class="ic">AWS</div><h3>Amazon Web Services</h3><p>Build and run apps on the most widely used cloud.</p><ul><li>EC2, S3, VPC, IAM</li><li>EKS, RDS, CloudWatch</li></ul><span class="tag">Cloud</span></article>
+
+<article class="c" data-g="cloud" style="--a:#3ba6ff"><div class="ic">AZ</div><h3>Microsoft Azure</h3><p>Deploy and secure workloads on Azure.</p><ul><li>VMs, Storage, VNets</li><li>AKS, Entra ID, Monitor</li></ul><span class="tag">Cloud</span></article>
+
+<article class="c" data-g="containers" style="--a:#22e4ff"><div class="ic">DK</div><h3>Docker</h3><p>Package any app so it runs the same everywhere.</p><ul><li>Images and Dockerfiles</li><li>Compose and registries</li></ul><span class="tag">Containers</span></article>
+
+<article class="c" data-g="containers" style="--a:#9b6bff"><div class="ic">K8s</div><h3>Kubernetes</h3><p>Run containers at scale with self-healing and rollouts.</p><ul><li>Pods, Deployments, Services</li><li>Ingress, Helm, autoscaling</li></ul><span class="tag">Containers</span></article>
+
+<article class="c" data-g="cicd" style="--a:#7dffb2"><div class="ic">GHA</div><h3>GitHub Actions</h3><p>Automate build, test and release from your repository.</p><ul><li>Workflows and runners</li><li>Secrets and reusable actions</li></ul><span class="tag">CI/CD</span></article>
+
+<article class="c" data-g="cicd" style="--a:#ff8a5f"><div class="ic">JK</div><h3>Jenkins</h3><p>Build flexible pipelines with the classic automation server.</p><ul><li>Jenkinsfile and agents</li><li>Plugins and shared libraries</li></ul><span class="tag">CI/CD</span></article>
+
+<article class="c" data-g="cicd" style="--a:#ff5fd2"><div class="ic">ARGO</div><h3>Argo CD</h3><p>Deploy to Kubernetes with GitOps: Git is the source of truth.</p><ul><li>Applications and sync</li><li>Rollbacks and drift detection</li></ul><span class="tag">CI/CD</span></article>
+
+<article class="c" data-g="iac" style="--a:#b48cff"><div class="ic">TF</div><h3>Terraform</h3><p>Create cloud infrastructure from code you can review.</p><ul><li>Providers, state, modules</li><li>Plan, apply, workspaces</li></ul><span class="tag">Infrastructure as code</span></article>
+
+</div>
+
+</section>
+
+
+
+<section id="path">
+
+<h2 class="t">A path from first container to production</h2>
+
+<p class="sub">Follow the order. Each step builds on the one before.</p>
+
+<ol class="path">
+
+<li><div><b>Docker</b><span>Containerize a small app and push it to a registry.</span></div></li>
+
+<li><div><b>AWS or Azure</b><span>Learn networking, identity and compute in your own account.</span></div></li>
+
+<li><div><b>Terraform</b><span>Rebuild that environment from code, then destroy and recreate it.</span></div></li>
+
+<li><div><b>Kubernetes</b><span>Run your app on a cluster with scaling and rolling updates.</span></div></li>
+
+<li><div><b>GitHub Actions or Jenkins</b><span>Build, test and publish your image on every commit.</span></div></li>
+
+<li><div><b>Argo CD</b><span>Let Git changes deploy to the cluster automatically.</span></div></li>
+
+</ol>
+
+</section>
+
+
+
+<div class="cta">
+
+<h2>Ready to build your first pipeline?</h2>
+
+<p>Start with Docker today and work toward a full GitOps deployment.</p>
+
+<a class="btn main" href="#courses">Choose a course</a>
+
+</div>
+
+<footer>Naveen Tech School. Learn cloud. Ship DevOps.</footer>
+
+</div>
+
+<script>
+
+document.querySelectorAll('.tab').forEach(function(t){t.addEventListener('click',function(){
+
+  document.querySelectorAll('.tab').forEach(function(x){x.setAttribute('aria-pressed',x===t)});
+
+  var f=t.dataset.f;
+
+  document.querySelectorAll('.c').forEach(function(c){c.hidden=!(f==='all'||c.dataset.g===f)});
+
+})});
+
+</script>
+
 </body>
+
 </html>
