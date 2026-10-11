@@ -2,7 +2,7 @@ name: Self-Healing Deploy
 
 on:
   push:
-    branches: [ master ]
+    branches: [main]
   workflow_dispatch:
 
 concurrency:
@@ -11,15 +11,14 @@ concurrency:
 
 permissions:
   contents: read
-#dj
+
 env:
-  FILE:     index.html
-  BUCKET:   6f-oct-10-10 
-  BACKUP:   backups/index-previous.html
-  REGION:   us-east-1
-  DIST_ID:  E4XMDCTJBXL3W
-  SITE_URL: https://d2oj7ogdvnd8k0.cloudfront.net/
-  MARKER:   SITE-OK
+  FILE: index.html
+  BUCKET: tech-ai-26
+  BACKUP: backups/index-previous.html
+  REGION: ap-south-1
+  DIST_ID: E2ZB7K8CWRECTF
+  MARKER: SITE-OK
 
 jobs:
   deploy:
@@ -27,55 +26,116 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Log in to AWS
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region:            ${{ env.REGION }}
+          aws-region: ${{ env.REGION }}
 
-      - name: Check the file
-        run: python check-html.py "$FILE"
+      - name: Get CloudFront website URL
+        run: |
+          set -euo pipefail
+          DOMAIN=$(aws cloudfront get-distribution \
+            --id "$DIST_ID" \
+            --query 'Distribution.DomainName' \
+            --output text)
+          if [ -z "$DOMAIN" ] || [ "$DOMAIN" = "None" ]; then
+            echo "Could not find CloudFront distribution: $DIST_ID"
+            exit 1
+          fi
+          echo "SITE_URL=https://${DOMAIN}/" >> "$GITHUB_ENV"
 
-      - name: Upload to S3
-        run: aws s3 cp "$FILE" "s3://$BUCKET/$FILE" --cache-control no-cache
+      - name: Check website file
+        run: |
+          set -euo pipefail
+          test -f "$FILE"
+          python check-html.py "$FILE"
+          grep -q "$MARKER" "$FILE"
+
+      - name: Check previous backup
+        id: backup
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          aws s3api head-object \
+            --bucket "$BUCKET" \
+            --key "$BACKUP" >/dev/null
+          echo "exists=true" >> "$GITHUB_OUTPUT"
+
+      - name: Upload website to S3
+        run: |
+          set -euo pipefail
+          aws s3 cp "$FILE" "s3://$BUCKET/$FILE" \
+            --content-type "text/html; charset=utf-8" \
+            --cache-control "no-cache"
 
       - name: Clear CloudFront cache
         run: |
-          ID=$(aws cloudfront create-invalidation --distribution-id "$DIST_ID" \
-                 --paths "/*" --query 'Invalidation.Id' --output text)
-          aws cloudfront wait invalidation-completed --distribution-id "$DIST_ID" --id "$ID"
+          set -euo pipefail
+          ID=$(aws cloudfront create-invalidation \
+            --distribution-id "$DIST_ID" \
+            --paths "/*" \
+            --query 'Invalidation.Id' \
+            --output text)
+          aws cloudfront wait invalidation-completed \
+            --distribution-id "$DIST_ID" \
+            --id "$ID"
 
       - name: Check the live website
         run: |
-          # -L is required: CloudFront redirects http to https
-          curl -fsSL --retry 5 --retry-delay 10 -o page.html "$SITE_URL"
-          test "$(grep -c "$MARKER" page.html)" -eq 1
+          set -euo pipefail
+          curl -fsSL --retry 5 --retry-delay 10 \
+            -o page.html "$SITE_URL"
+          grep -q "$MARKER" page.html
           test "$(wc -c < page.html)" -ge 1000
           echo "Site is healthy."
 
-      # Only runs when the check above passed, so the backup is always
-      # the last version that actually worked.
       - name: Remember this version as the good one
-        run: aws s3 cp "s3://$BUCKET/$FILE" "s3://$BUCKET/$BACKUP"
-
-      - name: Put the last good version back
-        if: failure()
         run: |
-          aws s3 cp "s3://$BUCKET/$BACKUP" "s3://$BUCKET/$FILE" --cache-control no-cache
-          ID=$(aws cloudfront create-invalidation --distribution-id "$DIST_ID" \
-                 --paths "/*" --query 'Invalidation.Id' --output text)
-          aws cloudfront wait invalidation-completed --distribution-id "$DIST_ID" --id "$ID"
-          curl -fsSL --retry 5 --retry-delay 10 -o page.html "$SITE_URL"
+          set -euo pipefail
+          aws s3 cp "s3://$BUCKET/$FILE" "s3://$BUCKET/$BACKUP" \
+            --content-type "text/html; charset=utf-8" \
+            --cache-control "no-cache"
+
+      - name: Roll back after a failed deployment
+        if: failure()
+        env:
+          BACKUP_EXISTS: ${{ steps.backup.outputs.exists }}
+        run: |
+          set -euo pipefail
+
+          if [ "$BACKUP_EXISTS" != "true" ]; then
+            echo "::error::No previous backup is available. Automatic rollback cannot run."
+            exit 1
+          fi
+
+          aws s3 cp "s3://$BUCKET/$BACKUP" "s3://$BUCKET/$FILE" \
+            --content-type "text/html; charset=utf-8" \
+            --cache-control "no-cache"
+
+          ID=$(aws cloudfront create-invalidation \
+            --distribution-id "$DIST_ID" \
+            --paths "/*" \
+            --query 'Invalidation.Id' \
+            --output text)
+
+          aws cloudfront wait invalidation-completed \
+            --distribution-id "$DIST_ID" \
+            --id "$ID"
+
+          curl -fsSL --retry 5 --retry-delay 10 \
+            -o page.html "$SITE_URL"
           grep -q "$MARKER" page.html
-          echo "::warning::Deploy failed. The last good version is back and healthy."
+          echo "::warning::Deployment failed; the previous version was restored."
 
       - name: Report
         if: always()
         run: |
           echo "### Deploy report" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Site: $SITE_URL" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Roll back by hand:" >> "$GITHUB_STEP_SUMMARY"
-          echo "  \`aws s3 cp s3://$BUCKET/$BACKUP s3://$BUCKET/$FILE --cache-control no-cache\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Bucket: s3://$BUCKET/$FILE" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Distribution: $DIST_ID" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Website: ${SITE_URL:-Unavailable}" >> "$GITHUB_STEP_SUMMARY"
